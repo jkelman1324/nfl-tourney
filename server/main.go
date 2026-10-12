@@ -7,29 +7,103 @@ import (
 )
 
 type Team struct {
-    Name    string  `json:"name"`
-    Spread  string  `json:"point"`
+    Name        string      `json:"name"`
+    Spread      float64     `json:"spread"`
 }
 
-type game struct {
-    ID          string  `json:"id"`
-    Home        Team    `json:"home"`
-    Away        Team    `json:"away"`
+type Game struct {
+    ID          string      `json:"id"`
+    Home        Team        `json:"home"`
+    Away        Team        `json:"away"`
+    Result      *string     `json:"result,omitempty"`
 }
 
-var weeklySchedule  = []game{
-    {ID: "1", Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
-    {ID: "2", Title: "Jeru", Artist: "Gerry Mulligan", Price: 17.99},
-    {ID: "3", Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
+var weeklySchedule  = []Game{
+    {
+        ID: "sea-den",
+        Away: Team{Name: "Seattle Seahawks", Spread: -3.0},
+        Home: Team{Name: "Denver Broncos", Spread: 3.0},
+    },
+    {
+        ID: "hou-jax",
+        Away: Team{Name: "Houston Texans", Spread: 3.0},
+        Home: Team{Name: "Jacksonville Jaguars", Spread: -3.0},
+    },
+    {
+        ID: "bal-cle",
+        Away: Team{Name: "Baltimore Ravens", Spread: -3.5},
+        Home: Team{Name: "Cleveland Browns", Spread: 3.5},
+    },
+    {
+        ID: "chi-atl",
+        Away: Team{Name: "Chicago Bears", Spread: 1.5},
+        Home: Team{Name: "Atlanta Falcons", Spread: -1.5},
+    },
+    {
+        ID: "car-phi",
+        Away: Team{Name: "Carolina Panthers", Spread: 1.5},
+        Home: Team{Name: "Philadelphia Eagles", Spread: -1.5},
+    },
+    {
+        ID: "pit-tb",
+        Away: Team{Name: "Pittsburgh Steelers", Spread: -3.0},
+        Home: Team{Name: "Tampa Bay Buccaneers", Spread: 3.0},
+    },
+    {
+        ID: "no-nyg",
+        Away: Team{Name: "New Orleans Saints", Spread: 1.5},
+        Home: Team{Name: "New York Giants", Spread: -1.5},
+    },
+    {
+        ID: "nyj-ne",
+        Away: Team{Name: "New York Jets", Spread: 7.0},
+        Home: Team{Name: "New England Patriots", Spread: -7.0},
+    },
+    {
+        ID: "ten-ind",
+        Away: Team{Name: "Tennessee Titans", Spread: 7.0},
+        Home: Team{Name: "Indianapolis Colts", Spread: -7.0},
+    },
+    {
+        ID: "ari-lar",
+        Away: Team{Name: "Arizona Cardinals", Spread: 12.5},
+        Home: Team{Name: "Los Angeles Rams", Spread: -12.5},
+    },
+    {
+        ID: "lac-kc",
+        Away: Team{Name: "Los Angeles Chargers", Spread: 8.5},
+        Home: Team{Name: "Kansas City Chiefs", Spread: -8.5},
+    },
+    {
+        ID: "buf-lv",
+        Away: Team{Name: "Buffalo Bills", Spread: -6.0},
+        Home: Team{Name: "Las Vegas Raiders", Spread: 6.0},
+    },
+    {
+        ID: "dal-gb",
+        Away: Team{Name: "Dallas Cowboys", Spread: 1.5},
+        Home: Team{Name: "Green Bay Packers", Spread: -1.5},
+    },
+    {
+        ID: "was-sf",
+        Away: Team{Name: "Washington Commanders", Spread: 7.5},
+        Home: Team{Name: "San Francisco 49ers", Spread: -7.5},
+    },
 }
 
-func helloWorld(c *gin.Context) {
-    c.IndentedJSON(http.StatusOK, albums)
+func games(c *gin.Context) {
+    c.IndentedJSON(http.StatusOK, weeklySchedule)
 }
 
 func main() {
     router := gin.Default()
-    router.GET("/hello", helloWorld)
+
+    // Static
+    router.Static("/static", "./static")
+    router.StaticFile("/", "./static/index.html")
+
+    // API
+    router.GET("/api/games", games)
 
     router.Run("localhost:8080")
 }
