@@ -1,0 +1,12 @@
+.matchup {
+    display: flex;
+    gap: 12px
+}
+
+.team-button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
