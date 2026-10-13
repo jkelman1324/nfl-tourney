@@ -1,5 +1,13 @@
 // app.js
 
+let activeGame = null;
+
+function selectPoints(gameID) {
+    activeGame = gameID;
+
+    // TODO: Highlight available points amounts.
+}
+
 async function loadGames() {
     const response = await fetch("/api/games");
     const games = await response.json();
@@ -38,7 +46,21 @@ async function loadGames() {
         homeButton.appendChild(homeName);
         homeButton.appendChild(homeSpread);
 
+        // Points Button
+        const pointsButton = document.createElement("button");
+        pointsButton.classList.add("points-button");
+        
+        const pointsValue = document.createElement("span");
+        pointsValue.classList.add("points-value");
+        pointsValue.textContent = "-";
+
+        pointsButton.appendChild(pointsValue);
+        pointsButton.addEventListener("click", () => {
+            selectPoints(game.id)
+        });
+
         matchup.appendChild(awayButton);
+        matchup.appendChild(pointsButton);
         matchup.appendChild(homeButton);
 
         container.appendChild(matchup);
