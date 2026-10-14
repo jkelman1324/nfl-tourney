@@ -18,6 +18,11 @@ type Game struct {
     Result      *string     `json:"result,omitempty"`
 }
 
+type Selection struct {
+    Points      *int        `json:"points-assigned,omitempty"`    
+    Team        string      `json:"selected-team"`
+}
+
 var weeklySchedule  = []Game{
     {
         ID: "sea-den",
@@ -95,6 +100,17 @@ func games(c *gin.Context) {
     c.IndentedJSON(http.StatusOK, weeklySchedule)
 }
 
+var points = 7
+var userSelections = map[string]Selection{
+    "sea-den": Selection{Points: &points, Team: "home"},
+    "dal-gb": Selection{Team: "away"},
+    "buf-lv": Selection{Team: "home"},
+}
+
+func selections(c *gin.Context) {
+    c.IndentedJSON(http.StatusOK, userSelections)
+}
+
 func main() {
     router := gin.Default()
 
@@ -104,6 +120,7 @@ func main() {
 
     // API
     router.GET("/api/games", games)
+    router.GET("/api/selections", selections)
 
     router.Run("localhost:8080")
 }
