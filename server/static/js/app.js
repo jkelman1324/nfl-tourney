@@ -105,7 +105,7 @@ async function load() {
         homeSpread.classList.add("spread");
         homeSpread.textContent = game.home.spread < 0
             ? game.home.spread
-            : `+${game.away.spread}`;
+            : `+${game.home.spread}`;
 
         homeButton.appendChild(homeName);
         homeButton.appendChild(homeSpread);
