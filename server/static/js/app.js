@@ -26,9 +26,10 @@ async function load() {
     const selections = await selectionsResponse.json();
 
     // Points Options Buttons
-    const pointsContainer = document.getElementById("pointsOptions");
+    const pointsContainer = document.querySelector(".points-buttons");
     for (let i = 0; i < games.length; i++) {
         const pointsOptionButton = document.createElement("button");
+        pointsOptionButton.classList.add("points-options-button");
         pointsOptionButton.textContent = i + 1;
         pointsOptionButton.dataset.points = i + 1;
         pointsContainer.appendChild(pointsOptionButton);
@@ -38,11 +39,20 @@ async function load() {
         }
 
         pointsOptionButton.addEventListener("click", () => {
-            if (assignPointsMode) {
+            let activeGame = document.querySelector(".points-assigned-button.selected")
+            if (activeGame) {
                 // TODO: Send selection update to backend.
-                document.getElementById(activeGame).textContent = i + 1;
+                // Re-enable overwritten points value.
+                if (activeGame.dataset.pointsAssigned != null) {
+                    document.querySelector(`.points-options-button[data-points="${activeGame.dataset.pointsAssigned}"]`).removeAttribute("disabled");
+                }
+
+                activeGame.textContent = i + 1;
+                activeGame.dataset.pointsAssigned = i + 1;
+                activeGame.classList.remove("selected");
                 pointsOptionButton.disabled = true;
-                assignPointsMode = false;
+            } else {
+                pointsOptionButton.classList.add("selected");
             }
         });
     }
@@ -50,22 +60,24 @@ async function load() {
     // Remove Points Button
     const removePointsButton = document.createElement("button");
     removePointsButton.textContent = "X";
-    removePointsButton.id = "remove-points";
+    removePointsButton.classList.add("remove-points-button");
 
-    removePointsButton.addEventListener("click", () => {
-        if (assignPointsMode && selectedPoints) {
+    removePointsButton.addEventListener("click", (event) => {
+        let activeGame = document.querySelector(".points-assigned-button.selected")
+        if (activeGame) {
             // TODO: Send selection removal update to backend.
-            document.getElementById(activeGame).textContent = "-";
-            document.querySelector(`[data-points="${selectedPoints}"]`).disabled = false;
-            assignPointsMode = false;
-            selectedPoints = null;
+            activeGame.textContent = "-";
+            document.querySelector(`.points-options-button[data-points="${activeGame.dataset.pointsAssigned}"]`).removeAttribute("disabled");
+            delete activeGame.dataset.pointsAssigned;
+        } else {
+            event.srcElement.classList.add("selected");
         }
     });
 
     pointsContainer.appendChild(removePointsButton);
 
     // Games
-    const gamesContainer = document.getElementById("games");
+    const gamesContainer = document.querySelector(".games");
     games.forEach(game => {
         const matchup = document.createElement("div");
         matchup.classList.add("matchup");
@@ -124,23 +136,45 @@ async function load() {
         });
 
         // Matchup Points Button
-        const pointsButton = document.createElement("button");
-        pointsButton.classList.add("points-button");
+        const matchupPointsAssignedButton = document.createElement("button");
+        matchupPointsAssignedButton.classList.add("points-assigned-button");
+        matchupPointsAssignedButton.id = game.id;
 
-        const pointsValue = document.createElement("span");
-        pointsValue.classList.add("points-value");
-        pointsValue.id = game.id
-        pointsValue.textContent = selections[game.id]?.["points-assigned"]
-            ? selections[game.id]["points-assigned"]
-            : "-";
+        if (selections[game.id]?.["points-assigned"] != null) {
+            matchupPointsAssignedButton.textContent = selections[game.id]["points-assigned"];
+            matchupPointsAssignedButton.dataset.pointsAssigned = selections[game.id]["points-assigned"];
+        } else {
+            matchupPointsAssignedButton.textContent = "-";
+        }
 
-        pointsButton.appendChild(pointsValue);
-        pointsButton.addEventListener("click", () => {
-            selectPoints(game.id, pointsValue.textContent);
+        matchupPointsAssignedButton.addEventListener("click", (event) => {
+            let pointsButtonSelected = document.querySelector(".points-options-button.selected");
+            if (pointsButtonSelected != null) {
+                event.srcElement.textContent = pointsButtonSelected.dataset.points;
+
+                if (event.srcElement.dataset.pointsAssigned != null) {
+                    document.querySelector(`.points-options-button[data-points="${event.srcElement.dataset.pointsAssigned}"]`).disabled = false;
+                }
+
+                event.srcElement.dataset.pointsAssigned = pointsButtonSelected.dataset.points;
+                pointsButtonSelected.classList.remove("selected");
+                pointsButtonSelected.disabled = true;
+            } else if (document.querySelector(".remove-points-button.selected")) {
+                event.srcElement.textContent = "-";
+
+                if (event.srcElement.dataset.pointsAssigned != null) {
+                    document.querySelector(`.points-options-button[data-points="${event.srcElement.dataset.pointsAssigned}"]`).disabled = false;
+                }
+
+                delete event.srcElement.dataset.pointsAssigned;
+                document.querySelector(".remove-points-button").classList.remove("selected");
+            } else {
+                event.srcElement.classList.add("selected");
+            }
         });
 
         matchup.appendChild(awayButton);
-        matchup.appendChild(pointsButton);
+        matchup.appendChild(matchupPointsAssignedButton);
         matchup.appendChild(homeButton);
 
         gamesContainer.appendChild(matchup);
