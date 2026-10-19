@@ -1,23 +1,5 @@
 // app.js
 
-let activeGame = null;
-let assignPointsMode = false;
-let selectedPoints = null;
-
-// { game.id: pointValue }
-let pointAssignments = {};
-
-function selectPoints(gameID, points) {
-    activeGame = gameID;
-    assignPointsMode = true;
-
-    if (points !== "-") {
-        selectedPoints = points;
-    }
-
-    // TODO: Highlight available points amounts.
-}
-
 async function load() {
     const gamesResponse = await fetch("/api/games");
     const games = await gamesResponse.json();
@@ -52,6 +34,11 @@ async function load() {
                 activeGame.classList.remove("selected");
                 pointsOptionButton.disabled = true;
             } else {
+                let pointsOptionSelected = document.querySelector(".points-options-button.selected");
+                if (pointsOptionSelected) {
+                    pointsOptionSelected.classList.remove("selected");
+                }
+
                 pointsOptionButton.classList.add("selected");
             }
         });
@@ -63,10 +50,12 @@ async function load() {
     removePointsButton.classList.add("remove-points-button");
 
     removePointsButton.addEventListener("click", (event) => {
-        let activeGame = document.querySelector(".points-assigned-button.selected")
+        let activeGame = document.querySelector(".points-assigned-button.selected");
+        console.log(activeGame);
         if (activeGame) {
             // TODO: Send selection removal update to backend.
             activeGame.textContent = "-";
+            activeGame.classList.remove("selected");
             document.querySelector(`.points-options-button[data-points="${activeGame.dataset.pointsAssigned}"]`).removeAttribute("disabled");
             delete activeGame.dataset.pointsAssigned;
         } else {
@@ -169,6 +158,11 @@ async function load() {
                 delete event.srcElement.dataset.pointsAssigned;
                 document.querySelector(".remove-points-button").classList.remove("selected");
             } else {
+                let matchupSelected = document.querySelector(".points-assigned-button.selected");
+                if (matchupSelected != null) {
+                    matchupSelected.classList.remove("selected");
+                }
+
                 event.srcElement.classList.add("selected");
             }
         });

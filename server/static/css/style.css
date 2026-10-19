@@ -45,3 +45,6 @@ body {
     gap: 12px;
 }
 
+.points-buttons .selected,.points-assigned-button.selected {
+    border: 2px solid #DE0000;
+}
