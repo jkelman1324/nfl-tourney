@@ -21,8 +21,8 @@ function createMatchup(game, selections) {
     const awaySpread = document.createElement("span");
     awaySpread.classList.add("spread");
     awaySpread.textContent = game.away.spread < 0
-        ? game.away.spread
-        : `+${game.away.spread}`;
+        ? `(${game.away.spread})`
+        : `(+${game.away.spread})`;
 
     awayButton.appendChild(awayName);
     awayButton.appendChild(awaySpread);
@@ -41,8 +41,8 @@ function createMatchup(game, selections) {
     const homeSpread = document.createElement("span");
     homeSpread.classList.add("spread");
     homeSpread.textContent = game.home.spread < 0
-        ? game.home.spread
-        : `+${game.home.spread}`;
+        ? `(${game.home.spread})`
+        : `(+${game.home.spread})`;
 
     homeButton.appendChild(homeName);
     homeButton.appendChild(homeSpread);
