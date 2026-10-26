@@ -177,6 +177,7 @@ function createPointsOptionsButtons(games, selections) {
             // TODO: Send selection removal update to backend.
             // Update state.
             state.removePointsMode = false;
+            state.selectedMatchupId = null;
 
             let activeGame = document.querySelector(".points-assigned-button.selected");
             activeGame.textContent = "-";
@@ -195,6 +196,7 @@ function createPointsOptionsButtons(games, selections) {
 }
 
 async function load() {
+    // Main page load function.
     try {
         const [games, selections] = await Promise.all([
             getGames(),
@@ -203,11 +205,12 @@ async function load() {
 
         setInitialState(games, selections);
 
-        createPointsOptionsButtons(state.games, state.selections);
-        createMatchups(state.games, state.selections);
     } catch (error) {
         console.error("Failed to initialize app:", error);
     }
+
+    createPointsOptionsButtons(state.games, state.selections);
+    createMatchups(state.games, state.selections);
 }
 
 load();
