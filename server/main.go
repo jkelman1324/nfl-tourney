@@ -1,30 +1,12 @@
 package main
 
 import (
-    "database/sql"
     "log"
     "net/http"
+    "time"
 
     _ "modernc.org/sqlite"
-    "github.com/gin-gonic/gin"
 )
-
-type Team struct {
-    Name        string      `json:"name"`
-    Spread      float64     `json:"spread"`
-}
-
-type Game struct {
-    ID          string      `json:"id"`
-    Home        Team        `json:"home"`
-    Away        Team        `json:"away"`
-    Result      *string     `json:"result,omitempty"`
-}
-
-type Selection struct {
-    Points      *int        `json:"points-assigned,omitempty"`    
-    Team        string      `json:"selected-team"`
-}
 
 var weeklySchedule  = []Game{
     {
@@ -99,58 +81,30 @@ var weeklySchedule  = []Game{
     },
 }
 
-func games(c *gin.Context) {
-    c.IndentedJSON(http.StatusOK, weeklySchedule)
-}
-
-var points = 7
 var userSelections = map[string]Selection{
-    "sea-den": Selection{Points: &points, Team: "home"},
+    "sea-den": Selection{Points: 7, Team: "home"},
     "dal-gb": Selection{Team: "away"},
     "buf-lv": Selection{Team: "home"},
 }
 
-func selections(c *gin.Context) {
-    c.IndentedJSON(http.StatusOK, userSelections)
-}
-
-func createTables(db *sql.DB) {
-    _, err := db.Exec(`
-        CREATE TABLE IF NOT EXISTS games (
-            id TEXT PRIMARY KEY,
-            home TEXT NOT NULL,
-            away TEXT NOT NULL
-        );
-    `)
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-
 func main() {
     // Database
-    db, err := sql.Open("sqlite", "./nfl-tourney.db")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer db.Close()
+    initializeDatabase()
 
-    if err := db.Ping(); err != nil {
-        log.Fatal(err)
-    }
-
-    createTables(db);
-
-    // Web Server
-    router := gin.Default()
-
-    // Static
-    router.Static("/static", "./static")
-    router.StaticFile("/", "./static/index.html")
+    mux := http.NewServeMux()
 
     // API
-    router.GET("/api/games", games)
-    router.GET("/api/selections", selections)
+    mux.HandleFunc("GET /api/games", getGames)
+    mux.HandleFunc("GET /api/selections", getSelections)
 
-    router.Run("localhost:8080")
+    // Static
+    mux.Handle("/", http.FileServer(http.Dir("./static")))
+
+    server := &http.Server{
+        Addr:               ":8080",
+        Handler:            mux,
+        ReadHeaderTimeout:  5 * time.Second,
+    }
+
+    log.Fatal(server.ListenAndServe())
 }
